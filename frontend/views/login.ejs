@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Axpect CRM - Login</title>
+
+    <link rel="stylesheet" href="/css/layout.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      /* modal */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .modal.open {
+        display: flex;
+      }
+      .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 320px;
+        text-align: center;
+        position: relative;
+      }
+      .close {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        font-size: 20px;
+        cursor: pointer;
+      }
+      #loginMsg {
+        margin-top: 12px;
+        font-weight: 600;
+        min-height: 20px;
+      }
+      #loginMsg.success {
+        color: #138000;
+      }
+      #loginMsg.error {
+        color: #c62828;
+      }
+      button[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      @media (max-width: 600px) {
+        .modal-content {
+          width: 92%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div><strong>Axpect CRM</strong></div>
+      <nav class="nav">
+        <div>
+          <a class="btn login-link" data-role="ADMIN" href="#">Admin</a>
+          <a class="btn login-link" data-role="CALLER" href="#">Caller</a>
+          <a class="btn login-link" data-role="DEO" href="#">DEO</a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main -->
+    <main class="container">
+      <div class="content">
+        <div class="left">
+          <img
+            src="/img/layout/login_page_img.jpg"
+            alt="Login Page Image"
+            style="max-width: 100%; height: auto"
+          />
+        </div>
+        <div class="right">
+          <h1>Welcome to Axpect Pharma</h1>
+          <div class="login-buttons">
+            <a class="login-link" data-role="ADMIN" href="#">ADMIN LOGIN</a>
+            <a class="login-link" data-role="DEO" href="#">DEO LOGIN</a>
+            <a class="login-link" data-role="CALLER" href="#">CALLER LOGIN</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" class="modal" aria-hidden="true">
+      <div
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="loginTitle"
+      >
+        <span class="close" title="Close">&times;</span>
+        <h2 id="loginTitle">Login</h2>
+
+        <form id="loginForm" autocomplete="off">
+          <input
+            type="text"
+            id="loginIdentifier"
+            name="identifier"
+            placeholder="Enter Your Email Id"
+            required
+          />
+          <input
+            type="password"
+            id="loginPassword"
+            name="password"
+            placeholder="Password"
+            required
+          />
+          <button id="loginBtn" type="submit">Login</button>
+        </form>
+
+        <div id="loginMsg" role="status"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      ©
+      <script>
+        document.write(new Date().getFullYear());
+      </script>
+      Axpect CRM
+    </footer>
+
+    <script>
+      /***** CONFIG - backend URLs for each role *****/
+      const API_ENDPOINTS = {
+        // ADMIN: "http://localhost:2000/api/admin/auth/login",
+        // CALLER: "http://localhost:2000/api/caller/auth/login",
+        // DEO: "http://localhost:2000/api/deo/auth/login",
+        ADMIN: "http://127.0.0.1:2000/api/admin/auth/login",
+        CALLER: "http://127.0.0.1:2000/api/caller/auth/login",
+        DEO: "http://127.0.0.1:2000/api/deo/auth/login",
+      };
+
+      /***** UI elements *****/
+      const modal = document.getElementById("loginModal");
+      const loginTitle = document.getElementById("loginTitle");
+      const loginForm = document.getElementById("loginForm");
+      const closeBtn = document.querySelector(".close");
+      const loginMsg = document.getElementById("loginMsg");
+      const loginBtn = document.getElementById("loginBtn");
+
+      let selectedRole = null;
+
+      // Safe JSON parse
+      async function safeParseResponse(res) {
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { message: text || res.statusText || "No response body" };
+        }
+      }
+
+      // Open modal
+      function openModalForRole(role) {
+        selectedRole = role;
+        loginTitle.textContent = `${role} LOGIN`;
+        loginMsg.textContent = "";
+        loginMsg.className = "";
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+        loginForm.reset();
+
+        const identifierInput = document.getElementById("loginIdentifier");
+        if (role === "CALLER") {
+          identifierInput.type = "text";
+          identifierInput.placeholder = "Enter Your Caller ID";
+        } else {
+          identifierInput.type = "email";
+          identifierInput.placeholder = "Enter Your Email Id";
+        }
+        identifierInput.focus();
+      }
+
+      // Close modal
+      function closeModal() {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+      }
+
+      // Role buttons
+      document.querySelectorAll(".login-link").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const role = btn.dataset.role || "USER";
+          openModalForRole(role);
+        });
+      });
+
+      // Close modal handlers
+      closeBtn.addEventListener("click", closeModal);
+      window.addEventListener("click", (ev) => {
+        if (ev.target === modal) closeModal();
+      });
+      window.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") closeModal();
+      });
+
+      // Email validation
+      function isValidEmail(e) {
+        return /\S+@\S+\.\S+/.test(e);
+      }
+
+      // Submit login
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loginMsg.className = "";
+        const identifier = document
+          .getElementById("loginIdentifier")
+          .value.trim();
+        const password = document.getElementById("loginPassword").value.trim();
+
+        if (!identifier || !password) {
+          loginMsg.textContent = "Please enter credentials.";
+          loginMsg.classList.add("error");
+          return;
+        }
+
+        // ✅ Validate only if not caller
+        if (selectedRole !== "CALLER" && !isValidEmail(identifier)) {
+          loginMsg.textContent = "Enter a valid email address.";
+          loginMsg.classList.add("error");
+          return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Logging in...";
+        loginMsg.textContent = "";
+
+        try {
+          const endpoint = API_ENDPOINTS[selectedRole];
+          if (!endpoint)
+            throw new Error("Invalid role or API endpoint missing");
+
+          let bodyData;
+          if (selectedRole === "CALLER") {
+            bodyData = { caller_id: identifier, password }; // ✅ Caller login by caller_id
+          } else {
+            bodyData = { email_id: identifier, password }; // ✅ Admin/DEO login by email
+          }
+
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyData),
+          });
+
+          const data = await safeParseResponse(res);
+
+          if (res.ok) {
+            loginMsg.textContent = data.message || "Login successful";
+            loginMsg.classList.add("success");
+
+            if (data.token) {
+              localStorage.setItem("token", data.token);
+              localStorage.setItem("role", selectedRole);
+
+              // ✅ Caller ke liye caller_id bhi store karo
+              if (selectedRole === "CALLER" && data.user?.caller_id) {
+                localStorage.setItem("caller_id", data.user.caller_id);
+              } else if (selectedRole === "ADMIN" && data.admin?.admin_id) {
+                localStorage.setItem("admin_id", data.admin.admin_id);
+              } else if (selectedRole === "DEO" && data.user?.deo_id) {
+                localStorage.setItem("deo_id", data.user.deo_id);
+              }
+            }
+
+            setTimeout(() => {
+              closeModal();
+              if (selectedRole === "ADMIN") {
+                window.location.href = "/admin/dashboard";
+              } else if (selectedRole === "DEO") {
+                window.location.href = "/deo/dashboard";
+              } else if (selectedRole === "CALLER") {
+                // // ✅ Redirect caller apne caller_id ke customers list pe
+                // const callerId = localStorage.getItem("caller_id");
+                // // window.location.href = `http://localhost:2000/api/test/${callerId}`;
+                window.location.href = "/caller/dashboard";
+              } else {
+                window.location.href = "/dashboard";
+              }
+            }, 900);
+          } else {
+            loginMsg.textContent =
+              data.message || `Login failed (${res.status})`;
+            loginMsg.classList.add("error");
+            console.warn("Login failed:", res.status, data);
+          }
+        } catch (err) {
+          console.error("Login error:", err);
+          loginMsg.textContent = "Network error. Check backend/CORS.";
+          loginMsg.classList.add("error");
+        } finally {
+          loginBtn.disabled = false;
+          loginBtn.textContent = "Login";
+        }
+      });
+    </script>
+  </body>
+</html>

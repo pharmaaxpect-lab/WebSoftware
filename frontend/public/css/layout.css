@@ -1,0 +1,251 @@
+body {
+      margin: 0;
+      padding: 0;
+      background: #061d34;
+      font-family: Arial, sans-serif;
+      color: #cfe9f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---------- HEADER ---------- */
+    .header {
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #082945;
+      flex-wrap: wrap;
+    }
+
+    .header .btn {
+      margin-left: 15px;
+      color: #00c9d7;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .header .btn:hover {
+      text-decoration: underline;
+    }
+
+    /* ---------- MAIN CONTAINER ---------- */
+    main.container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 15px;
+    }
+
+    .content {
+      display: flex;
+      align-items: center;
+      gap: 50px;
+      flex-wrap: wrap;
+      max-width: 1100px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ---------- LEFT IMAGE ---------- */
+    .left img {
+      width: 450px;
+      max-width: 100%;
+      border-radius: 16px;
+      box-shadow: 0px 6px 18px rgba(0,0,0,0.5);
+      animation: pan 20s infinite linear alternate;
+    }
+
+    @keyframes pan {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(-10px) translateY(-8px); }
+      100% { transform: translateX(10px) translateY(8px); }
+    }
+
+    /* ---------- RIGHT CONTENT ---------- */
+    .right {
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .right h1 {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      font-weight: bold;
+      color: #b8e0f7;
+    }
+
+    .login-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .login-buttons a {
+      background: transparent;
+      border: 2px solid #00a9c9;
+      color: #00c9d7;
+      font-weight: bold;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    .login-buttons a:hover {
+      background: #00c9d7;
+      color: #061d34;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      font-size: 1.8rem;
+    }
+
+    .social-icons a {
+      color: #00c9d7;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .social-icons a:hover {
+      color: #fff;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .footer {
+      text-align: center;
+      padding: 15px;
+      background: #082945;
+      color: #cfe9f5;
+      font-size: 0.9rem;
+    }
+
+    /* ---------- RESPONSIVE BREAKPOINTS ---------- */
+    @media (max-width: 992px) {
+      .content {
+        gap: 30px;
+      }
+
+      .right h1 {
+        font-size: 1.8rem;
+      }
+
+      .left img {
+        width: 380px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .content {
+        flex-direction: column;
+        gap: 25px;
+      }
+
+      .left img {
+        width: 320px;
+      }
+
+      .right h1 {
+        font-size: 1.6rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .right h1 {
+        font-size: 1.4rem;
+      }
+
+      .login-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .login-buttons a {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+      }
+
+      .social-icons {
+        font-size: 1.5rem;
+        gap: 20px;
+      }
+    }
+
+
+    /* ===  pop window css =======*/
+
+     /* Modal background */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Modal box */
+  .modal-content {
+    background: #082945;
+    color: #cfe9f5;
+    padding: 25px;
+    border-radius: 12px;
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+
+  .modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #00c9d7;
+  }
+
+  .modal-content input {
+    width: 94%;
+    margin: 8px 0px;
+    padding: 12px 10px;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+  }
+
+  .modal-content button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 12px;
+    background: #00c9d7;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .modal-content button:hover {
+    background: #00a9c9;
+  }
+
+  .close {
+    float: right;
+    font-size: 22px;
+    cursor: pointer;
+    color: #fff;
+  }
