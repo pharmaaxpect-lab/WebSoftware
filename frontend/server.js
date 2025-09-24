@@ -42,6 +42,28 @@ app.get("/deo/support", (req, res) => {
   });
 });
 
+// ----------- CALLER ROUTES -----------
+
+app.get("/caller/customer_details", (req, res) => {
+  res.render("pages/caller/customer_details", { title: "Customer Details", layout: "layouts/caller" });
+});
+
+app.get("/caller/hide_customer", (req, res) => {
+  res.render("pages/caller/hide_customer", { title: "Customer Details", layout: "layouts/caller" });
+});
+
+app.get("/caller/dashboard", (req, res) => {
+  res.render("pages/caller/dashboard", { title: "DEO Dashboard", layout: "layouts/caller" });
+});
+
+app.get("/caller/personal_details", (req, res) => {
+  res.render("pages/caller/personal_details", { title: "DEO Profile", layout: "layouts/caller" });
+});
+
+app.get("/caller/support", (req, res) => {
+  res.render("pages/caller/support", { title: "DEO Settings", layout: "layouts/caller" });
+});
+
 // Login Page (Home)
 app.get("/", (req, res) => {
   res.render("login", { title: "Login", layout: false });

@@ -376,8 +376,8 @@
     </div>
 
     <script>
-      const API_URL = "http://crm.axpectportal.in/admin/user";
-      const APIURL = "http://crm.axpectportal.in/customers";
+      const API_URL = "https://crm.axpectportal.in/admin/user";
+      const APIURL = "https://crm.axpectportal.in/customers";
 
       const form = document.getElementById("customerForm");
       const tbody = document.querySelector("#customerTable tbody");
@@ -575,7 +575,7 @@
         msgDiv.style.color = "blue";
 
         try {
-          const response = await fetch("http://crm.axpectportal.in/importUser", {
+          const response = await fetch("https://crm.axpectportal.in/importUser", {
             method: "POST",
             body: formData,
           });

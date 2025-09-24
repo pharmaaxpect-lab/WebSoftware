@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Customer Form</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        margin: 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f4f4f4;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+      button {
+        margin: 2px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+      }
+      #searchInput {
+        margin-top: 15px;
+        margin-bottom: 10px;
+        padding: 8px;
+        width: 50%;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .input_bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 75px;
+        padding-bottom: 40px;
+        row-gap: 0px;
+      }
+
+      .input_bar_btn {
+        margin-top: 16px;
+      }
+
+      form input,
+      form select {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 6px;
+        border-radius: 6px;
+        border-color: #a5a7aa;
+        background: #ffffff;
+        font-size: 14px;
+        outline: none;
+        appearance: none;
+      }
+
+      form input:focus,
+      form select:focus {
+        border-color: #2b8cff;
+      }
+
+      form button {
+        margin-top: 16px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #2b8cff;
+        color: #fff;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      form button:hover {
+        background: #0077e6;
+      }
+      .table_heading {
+        padding: 0px;
+        margin-top: -35px;
+        margin-bottom: 5px;
+      }
+
+      table button {
+        margin-top: 8px;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        background: #2b8cff;
+        color: #fff;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      table button:hover {
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Edit Customer Status</h1>
+    <form id="customerForm">
+      <input type="hidden" id="customerId" />
+
+      <div class="input_bar">
+        <div>
+          <label>Caller Id:</label>
+          <input type="text" id="caller_Id" readonly /><br /><br />
+        </div>
+        <div>
+          <label>Name:</label>
+          <input type="text" id="name" readonly /><br /><br />
+        </div>
+        <div>
+          <label>Mobile No:</label>
+          <input type="text" id="mob_no" readonly /><br /><br />
+        </div>
+        <div>
+          <label>Email ID:</label>
+          <input type="email" id="email_id" readonly /><br /><br />
+        </div>
+        <div>
+          <label>Address:</label>
+          <input type="text" id="address" readonly /><br /><br />
+        </div>
+        <div>
+          <label>Query Date:</label>
+          <input type="date" id="query_date" readonly /><br /><br />
+        </div>
+        <div>
+          <label>Status:</label>
+          <select id="dropdown" required>
+            <option value="">-- Select Status --</option>
+            <option value="Interested">Interested</option>
+            <option value="Not Interested">Not Interested</option>
+            <option value="Busy">Busy</option>
+            <option value="Call Not Received">Call Not Received</option>
+            <option value="Very Interested">Very Interested</option>
+            <option value="Confirm Booking">Confirm Booking</option>
+          </select>
+          <br /><br />
+        </div>
+        <div>
+          <label>Comment:</label>
+          <input type="text" id="comment" />
+        </div>
+        <div>
+          <label>Notification Time:</label>
+          <input type="time" id="notification_time" /><br /><br />
+        </div>
+
+        <div class="input_bar_btn">
+          <button type="submit">Update</button>
+        </div>
+
+        <div class="input_bar_btn">
+          <button type="reset">Reset</button>
+        </div>
+      </div>
+    </form>
+
+    <h2 class="table_heading">Customer List</h2>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search by Name, Mobile, or Email..."
+    />
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Caller Id</th>
+            <th>Name</th>
+            <th>Mobile No</th>
+            <th>Email ID</th>
+            <th>Address</th>
+            <th>Query Date</th>
+            <th>Status</th>
+            <th>Comment</th>
+            <th>Notification Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="customerTableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      const form = document.getElementById("customerForm");
+      const customerTableBody = document.getElementById("customerTableBody");
+      const searchInput = document.getElementById("searchInput");
+      let allCustomers = [];
+
+      // Submit (Update only lead_status, comment, alert_time)
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("customerId").value;
+        const token = localStorage.getItem("token");
+
+        const formData = {
+          lead_status: document.getElementById("dropdown").value,
+          comment: document.getElementById("comment").value,
+          alert_time: document.getElementById("notification_time").value,
+        };
+
+        if (id) {
+          await fetch(`http://crm.axpectportal.in/customers/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify(formData),
+          });
+        }
+
+        form.reset();
+        document.getElementById("customerId").value = "";
+        loadMyCustomers();
+      });
+
+      // ✅ Load customers only for logged-in caller
+      async function loadMyCustomers() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("Session expired. Please login again.");
+          window.location.href = "/login.html";
+          return;
+        }
+
+        const res = await fetch(
+          "http://crm.axpectportal.in/caller/my-customers",
+          {
+            method: "GET",
+            headers: { Authorization: "Bearer " + token },
+          }
+        );
+
+        const data = await res.json();
+        if (res.ok) {
+          allCustomers = data.customers || [];
+          renderTable(allCustomers);
+        } else {
+          alert(data.message || "Failed to fetch customers");
+        }
+      }
+
+      // Render table
+      function renderTable(customers) {
+        customerTableBody.innerHTML = "";
+        customers.forEach((c) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${c.caller_id || ""}</td>
+            <td>${c.name || ""}</td>
+            <td>${c.mob_no || ""}</td>
+            <td>${c.email_id || ""}</td>
+            <td>${c.address || ""}</td>
+            <td>${c.query_date ? c.query_date.split("T")[0] : ""}</td>
+            <td>${c.lead_status || ""}</td>
+            <td>${c.comment || ""}</td>
+            <td>${c.alert_time || ""}</td>
+            <td>
+              <button onclick='editCustomer(${JSON.stringify(c)})'>Edit</button>
+              <button onclick='hideCustomer("${c._id}")'>Hide</button>
+            </td>
+          `;
+          customerTableBody.appendChild(row);
+        });
+      }
+
+      // Edit customer
+      function editCustomer(c) {
+        document.getElementById("customerId").value = c._id || c.id;
+        document.getElementById("caller_Id").value = c.caller_id || "";
+        document.getElementById("name").value = c.name || "";
+        document.getElementById("mob_no").value = c.mob_no || "";
+        document.getElementById("email_id").value = c.email_id || "";
+        document.getElementById("address").value = c.address || "";
+
+        document.getElementById("query_date").value = c.query_date
+          ? c.query_date.split("T")[0]
+          : "";
+
+        document.getElementById("dropdown").value = c.lead_status || "";
+        document.getElementById("comment").value = c.comment || "";
+        document.getElementById("notification_time").value =
+          c.alert_time || "";
+      }
+
+      // 👉 Hide customer
+      async function hideCustomer(id) {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("Session expired. Please login again.");
+          window.location.href = "/login.html";
+          return;
+        }
+
+        if (!confirm("Are you sure you want to hide this customer?")) return;
+
+        try {
+          const res = await fetch(
+            `http://crm.axpectportal.in/caller/customers/${id}/hide`,
+            {
+              method: "PUT",
+              headers: { Authorization: "Bearer " + token },
+            }
+          );
+
+          const data = await res.json();
+          if (res.ok) {
+            alert("Customer hidden successfully");
+            loadMyCustomers();
+          } else {
+            alert(data.message || "Failed to hide customer");
+          }
+        } catch (err) {
+          console.error("Error hiding customer:", err);
+          alert("Server error while hiding customer");
+        }
+      }
+
+      // Search filter
+      searchInput.addEventListener("input", () => {
+        const s = searchInput.value.toLowerCase();
+        const filtered = allCustomers.filter(
+          (c) =>
+            (c.name || "").toLowerCase().includes(s) ||
+            (c.mob_no || "").toLowerCase().includes(s) ||
+            (c.email_id || "").toLowerCase().includes(s)
+        );
+        renderTable(filtered);
+      });
+
+      // 🚀 Initial load
+      loadMyCustomers();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hidden Customers</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        margin: 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f4f4f4;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+      button {
+        margin: 2px;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        background: #2b8cff;
+        color: #fff;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+      button:hover {
+        transform: scale(1.05);
+      }
+
+      .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+      }
+
+      #searchInput {
+        margin-top: 15px;
+        margin-bottom: 10px;
+        padding: 8px;
+        width: 50%;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .table_heading {
+        padding: 0px;
+        margin-top: 15px;
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hidden Customers</h1>
+
+    <h2 class="table_heading">Hidden Customer List</h2>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search by Name, Mobile, or Email..."
+    />
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Caller Id</th>
+            <th>Name</th>
+            <th>Mobile No</th>
+            <th>Email ID</th>
+            <th>Address</th>
+            <th>Query Date</th>
+            <th>Status</th>
+            <th>Comment</th>
+            <th>Notification Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="hiddenCustomerTableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      const hiddenCustomerTableBody = document.getElementById(
+        "hiddenCustomerTableBody"
+      );
+      const searchInput = document.getElementById("searchInput");
+      let hiddenCustomers = [];
+
+      // ✅ Load hidden customers
+      async function loadHiddenCustomers() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("Session expired. Please login again.");
+          window.location.href = "/login.html";
+          return;
+        }
+
+        const res = await fetch(
+          "http://crm.axpectportal.in/caller/my-hidden-customers",
+          {
+            method: "GET",
+            headers: { Authorization: "Bearer " + token },
+          }
+        );
+
+        const data = await res.json();
+        if (res.ok) {
+          hiddenCustomers = data.customers || [];
+          renderHiddenTable(hiddenCustomers);
+        } else {
+          alert(data.message || "Failed to fetch hidden customers");
+        }
+      }
+
+      // Render hidden customers table
+      function renderHiddenTable(customers) {
+        hiddenCustomerTableBody.innerHTML = "";
+        customers.forEach((c) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${c.caller_id || ""}</td>
+            <td>${c.name || ""}</td>
+            <td>${c.mob_no || ""}</td>
+            <td>${c.email_id || ""}</td>
+            <td>${c.address || ""}</td>
+            <td>${c.query_date ? c.query_date.split("T")[0] : ""}</td>
+            <td>${c.lead_status || ""}</td>
+            <td>${c.comment || ""}</td>
+            <td>${c.alert_time || ""}</td>
+            <td>
+              <button onclick='unhideCustomer("${c._id}")'>Unhide</button>
+            </td>
+          `;
+          hiddenCustomerTableBody.appendChild(row);
+        });
+      }
+
+      // 👉 Unhide customer
+      async function unhideCustomer(id) {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("Session expired. Please login again.");
+          window.location.href = "/login.html";
+          return;
+        }
+
+        if (!confirm("Are you sure you want to unhide this customer?")) return;
+
+        try {
+          const res = await fetch(
+            `http://crm.axpectportal.in/caller/customers/${id}/unhide`,
+            {
+              method: "PUT",
+              headers: { Authorization: "Bearer " + token },
+            }
+          );
+
+          const data = await res.json();
+          if (res.ok) {
+            alert("Customer unhidden successfully");
+            loadHiddenCustomers();
+          } else {
+            alert(data.message || "Failed to unhide customer");
+          }
+        } catch (err) {
+          console.error("Error un-hiding customer:", err);
+          alert("Server error while un-hiding customer");
+        }
+      }
+
+      // Search filter
+      searchInput.addEventListener("input", () => {
+        const s = searchInput.value.toLowerCase();
+        const filtered = hiddenCustomers.filter(
+          (c) =>
+            (c.name || "").toLowerCase().includes(s) ||
+            (c.mob_no || "").toLowerCase().includes(s) ||
+            (c.email_id || "").toLowerCase().includes(s)
+        );
+        renderHiddenTable(filtered);
+      });
+
+      // 🚀 Initial load
+      loadHiddenCustomers();
+    </script>
+  </body>
+</html>

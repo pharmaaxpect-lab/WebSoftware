@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Caller CRM Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        margin: 0px;
+      }
+      h2 {
+        margin-bottom: 20px;
+      }
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      .stats div {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        flex: 1 1 120px;
+        text-align: center;
+      }
+      .stats span {
+        display: block;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-top: 5px;
+      }
+      .filter {
+        margin-bottom: 20px;
+      }
+      select {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📊 Caller CRM Dashboard</h2>
+
+    <!-- Filter for Daily, Weekly, Monthly, Annually -->
+    <div class="filter">
+      <label><b>Select Range:</b></label>
+      <select id="timeFilter">
+        <option value="all">All</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="annually">Annually</option>
+      </select>
+    </div>
+
+    <div class="dashboard">
+      <!-- Stats -->
+      <div class="card">
+        <h3>Lead Report</h3>
+        <div class="stats" id="statsContainer"></div>
+      </div>
+
+      <!-- Pie Chart -->
+      <div class="card">
+        <h3>Lead Status %</h3>
+        <canvas id="pieChart"></canvas>
+      </div>
+
+      <!-- Bar Chart -->
+      <div class="card" style="grid-column: span 2">
+        <h3>Lead Status Distribution</h3>
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <script>
+      let pieChart,
+        barChart,
+        allLeads = [];
+
+      async function loadDashboard() {
+        try {
+          // 🔑 caller_id और token localStorage से लो
+          const callerId = localStorage.getItem("caller_id");
+          const token = localStorage.getItem("token");
+
+          if (!callerId || !token) {
+            alert("Session expired! Please login again.");
+            window.location.href = "/";
+            return;
+          }
+
+          // ✅ API call with token
+          const res = await fetch(
+            `http://crm.axpectportal.in/caller/my-all-customer`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            alert(data.message || "Failed to fetch leads");
+            return;
+          }
+
+          // ✅ Backend से सही array लो
+          allLeads = data.customers || [];
+
+          // Default: Show all
+          renderDashboard("all");
+
+          // Filter event
+          document
+            .getElementById("timeFilter")
+            .addEventListener("change", (e) => {
+              renderDashboard(e.target.value);
+            });
+        } catch (err) {
+          console.error(err);
+          alert("Error loading dashboard data");
+        }
+      }
+
+      function renderDashboard(range) {
+        let filteredLeads = filterByRange(allLeads, range);
+
+        // Status count
+        const statusCounts = {};
+        filteredLeads.forEach((lead) => {
+          let status = lead.lead_status || "Pending Calls";
+          if (status === "Unknown") status = "Pending Calls";
+          statusCounts[status] = (statusCounts[status] || 0) + 1;
+        });
+
+        const totalLeads = filteredLeads.length;
+        const labels = Object.keys(statusCounts);
+        const values = Object.values(statusCounts);
+        const percentages = values.map((v) =>
+          totalLeads > 0 ? ((v / totalLeads) * 100).toFixed(2) : 0
+        );
+
+        // Stats update
+        const statsContainer = document.getElementById("statsContainer");
+        statsContainer.innerHTML = `
+      <div>
+        Total Leads
+        <span>${totalLeads}</span>
+      </div>
+    `;
+        labels.forEach((status, i) => {
+          statsContainer.innerHTML += `
+        <div>
+          ${status}
+          <span>${values[i]} (${percentages[i]}%)</span>
+        </div>
+      `;
+        });
+
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(document.getElementById("pieChart"), {
+          type: "pie",
+          data: {
+            labels: labels.map((status, i) => `${status} (${percentages[i]}%)`),
+            datasets: [
+              {
+                data: values,
+                backgroundColor: [
+                  "#4CAF50",
+                  "#3498db",
+                  "#e67e22",
+                  "#E74C3C",
+                  "#9b59b6",
+                  "#16a085",
+                  "#f1c40f",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                onClick: (e, legendItem, legend) => {
+                  e.native?.stopPropagation(); // ❌ disable hide/unhide
+                },
+              },
+            },
+          },
+        });
+
+        // Bar Chart
+        // Bar Chart
+        if (barChart) barChart.destroy();
+        barChart = new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Number of Leads",
+                data: values,
+                backgroundColor: "#3498db",
+              },
+              {
+                label: "Percentage (%)",
+                data: percentages.map(Number),
+                backgroundColor: "#2ecc71",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                onClick: (e, legendItem, legend) => {
+                  e.native?.stopPropagation(); // ❌ disable hide/unhide
+                },
+              },
+            },
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+      }
+
+      function filterByRange(leads, range) {
+        const now = new Date(); // Local system time
+
+        if (range === "all") return leads;
+
+        return leads.filter((lead) => {
+          // 👉 Backend UTC timestamp → JS auto local में बदलेगा
+          const date = new Date(lead.createdAt);
+
+          if (range === "daily") {
+             const startOfWeek = new Date(
+              now.getFullYear(),
+              now.getMonth(),
+              now.getDate() - 2,
+              0,
+              0,
+              0,
+              0
+            );
+            return date >= startOfWeek && date <= now;
+          }
+
+          if (range === "weekly") {
+            const startOfWeek = new Date(
+              now.getFullYear(),
+              now.getMonth(),
+              now.getDate() - 7,
+              0,
+              0,
+              0,
+              0
+            );
+            return date >= startOfWeek && date <= now;
+          }
+
+          if (range === "monthly") {
+            return (
+              date.getMonth() === now.getMonth() &&
+              date.getFullYear() === now.getFullYear()
+            );
+          }
+
+          if (range === "annually") {
+            return date.getFullYear() === now.getFullYear();
+          }
+
+          return true;
+        });
+      }
+
+      // 🚀 Load Dashboard
+      loadDashboard();
+    </script>
+  </body>
+</html>
