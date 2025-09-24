@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+
+  <!-- Custom CSS -->
+  <style>
+    /* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #ecf0f1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c3e50;
+  padding: 12px 20px;
+  color: white;
+  height: 60px;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon-btn {
+  color: white;
+  font-size: 18px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.icon-btn:hover {
+  color: #f39c12;
+}
+
+/* Main Layout */
+.main-container {
+  display: flex;
+  flex: 1; /* ye ensure karega ki footer bottom pe rahe */
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #34495e;
+  color: white;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  padding: 12px 20px;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  transition: background 0.3s, transform 0.2s;
+  font-weight: normal; /* 🔑 fix bold issue */
+}
+
+.sidebar ul li a:hover {
+  background: #2c3e50;
+  transform: translateX(5px);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  padding: 20px;
+  background: #f7f9fc;
+  min-height: calc(100vh - 60px - 60px); 
+}
+
+/* Footer */
+.footer {
+  background: #2c3e50;
+  color: white;
+  text-align: center;
+  padding: 15px;
+}
+
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">Welcome to Axpect Pharma</div>
+    <div class="nav-right">
+      <div>username</div>
+      <a href="/notifications" class="icon-btn"><i class="fa-solid fa-bell"></i></a>
+      <a href="#" id="logoutBtn" class="icon-btn">
+  <i class="fa-solid fa-right-from-bracket"></i>
+</a>
+    </div>
+  </nav>
+
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <ul>
+        <li><a href="/deo/dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+        <li><a href="/deo/personal_details"><i class="fa-solid fa-users"></i> Personal Details</a></li>
+        <li><a href="/deo/support"><i class="fa-solid fa-gear"></i> Support</a></li>
+      </ul>
+    </aside>
+
+    <!-- Page Content -->
+    <main class="content">
+      <%- body %>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 MyApp. All rights reserved.</p>
+  </footer>
+
+  <script>
+  document.getElementById("logoutBtn").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    // ✅ Clear localStorage
+    localStorage.clear();
+
+    // ✅ Show alert
+    alert("You have been logged out successfully!");
+
+    // ✅ Redirect to homepage/login
+    window.location.href = "/";
+  });
+
+</script>
+
+  <script>
+       const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  function logout() {
+    localStorage.clear();
+    window.location.href = "/";
+  }
+
+  // async function verifyToken() {
+  //   if (!token && role != "CALLER") return logout();
+
+  //   try {
+  //     const res = await fetch("http://localhost:2000/api/caller/auth/verify", {
+  //       method: "POST",
+  //       headers: { 
+  //         "Content-Type": "application/json",
+  //         "Authorization": "Bearer " + token
+  //       }
+  //     });
+
+  //     const data = await res.json();
+  //     if (!res.ok || !data.success) {
+  //       logout();
+  //     }
+  //   } catch {
+  //     logout();
+  //   }
+  // }
+
+  // // 🚀 Check once at page load
+  // verifyToken();
+
+  // // 🚀 Keep checking every 1 minute (60000 ms)
+  // setInterval(verifyToken, 60000);
+</script>
+</body>
+</html>

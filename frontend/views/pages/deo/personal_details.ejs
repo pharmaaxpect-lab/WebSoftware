@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DEO Profile</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #1e3a8a;
+      margin-bottom: 20px;
+    }
+    .container {
+          display: flex
+;
+    
+    max-width: 600px;
+    padding: 20px;
+    
+    
+    
+    justify-self: anchor-center;
+    gap: 25px;
+    flex-direction: column;
+    
+    
+    row-gap: 25px;
+    
+    max-width: 600px;
+   
+    }
+    .field {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      gap: 100px;
+    }
+    .field:last-child {
+      border-bottom: none;
+    }
+    .label {
+      font-weight: bold;
+      color: #374151;
+    }
+    .value {
+      color: #1f2937;
+    }
+    .no-data {
+      text-align: center;
+      color: #6b7280;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="welcome">Welcome</h1>
+
+  <div class="container" id="deoContainer">
+    <div class="no-data">Loading...</div>
+  </div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const res = await fetch("http://localhost:2000/api/deo/D001"); // 👈 update with your actual API URL
+        const data = await res.json();
+        const deoContainer = document.getElementById("deoContainer");
+        const welcome = document.getElementById("welcome");
+
+        if (!data || data.length === 0) {
+          deoContainer.innerHTML = `<div class="no-data">No records found</div>`;
+          return;
+        }
+
+        // If API returns an array, take first record
+        const item = data[0];
+
+        // Update welcome message
+        welcome.textContent = `Welcome to ${item.name}`;
+
+        // Fill container with details
+        deoContainer.innerHTML = `
+          <div class="field">
+            <div class="label">DEO ID:</div>
+            <div class="value">${item.deo_id}</div>
+          </div>
+          <div class="field">
+            <div class="label">Name:</div>
+            <div class="value">${item.name}</div>
+          </div>
+          <div class="field">
+            <div class="label">Mobile No:</div>
+            <div class="value">${item.mob_no}</div>
+          </div>
+          <div class="field">
+            <div class="label">Email ID:</div>
+            <div class="value">${item.email_id}</div>
+          </div>
+        `;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        document.getElementById("deoContainer").innerHTML =
+          `<div class="no-data">Failed to load data</div>`;
+      }
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>

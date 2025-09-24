@@ -1,0 +1,48 @@
+.form_container{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50px;
+}
+
+label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+   .input {
+      padding: 6px 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .address {
+      padding: 6px 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      height: 80px;
+    }
+
+    .date {
+      padding: 6px 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .btn {
+      padding: 6px 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .bottom_row{
+      margin-top: -80px;
+    }

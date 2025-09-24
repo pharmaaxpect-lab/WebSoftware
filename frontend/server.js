@@ -1,24 +1,53 @@
 const express = require("express");
-const app = express();
 const path = require("path");
+const expressLayouts = require("express-ejs-layouts");
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-// set ejs as view engine
+// ---------- Set EJS view engine ----------
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+// ---------- Middleware ----------
 app.use(express.static(path.join(__dirname, "public")));
+app.use(expressLayouts);
 
+// Default layout (optional, can override per route)
+app.set("layout", "layouts/deo");
 
+// ---------- Routes ----------
 
-// =========== Login Home Page ======================
-
-app.get("/", (req, res) => {
-  res.render("login"); // views/login.ejs
+// DEO Dashboard
+app.get("/deo/dashboard", (req, res) => {
+  res.render("pages/deo/dashboard", {
+    title: "DEO Dashboard",
+    layout: "layouts/deo"
+  });
 });
 
-// app.get("/", (req, res) => {
-//   res.send("<h1>✅ Frontend is running!</h1>");
-// });
+// DEO Personal Details
+app.get("/deo/personal_details", (req, res) => {
+  res.render("pages/deo/personal_details", {
+    title: "DEO Profile",
+    layout: "layouts/deo"
+  });
+});
 
-app.listen(PORT, () => console.log(`Frontend running on port ${PORT}`));
+// DEO Support
+app.get("/deo/support", (req, res) => {
+  res.render("pages/deo/support", {
+    title: "DEO Settings",
+    layout: "layouts/deo"
+  });
+});
+
+// Login Page (Home)
+app.get("/", (req, res) => {
+  res.render("login", { title: "Login", layout: false });
+});
+
+// ---------- Start Server ----------
+app.listen(PORT, () => {
+  console.log(`✅ Frontend running at http://localhost:${PORT}`);
+});

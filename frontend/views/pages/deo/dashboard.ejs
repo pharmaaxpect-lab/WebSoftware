@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Customer Management</title>
+
+    <style>
+      :root {
+        --accent: #2b8cff;
+        --muted: #6b7280;
+        --bg: #f9fafb;
+        --input-bg: #ffffff;
+        --border-color: #d1d5db;
+        --hover-row: #f1f5f9;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        margin: 0;
+      }
+
+      /* .card {
+    
+  } */
+
+      h1,
+      h2 {
+        margin: 0 0 16px 0;
+        font-weight: 600;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+      h2 {
+        font-size: 20px;
+      }
+
+      form label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 500;
+      }
+
+      form input,
+      form select {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 6px;
+        border-radius: 6px;
+
+        border-color: #a5a7aa;
+        background: #ffffff;
+        font-size: 14px;
+        outline: none;
+        appearance: none;
+      }
+
+      form input:focus,
+      form select:focus {
+        border-color: var(--accent);
+      }
+
+      form button {
+        margin-top: 16px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      form button:hover {
+        background: #0077e6;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .input_bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 75px;
+        padding-bottom: 40px;
+        row-gap: 25px;
+      }
+
+      .input_bar_btn {
+        margin-top: 25px;
+      }
+
+      .controls input[type="search"] {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        outline: none;
+      }
+
+      .controls button {
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: none;
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .controls button:hover {
+        background: #0077e6;
+      }
+
+      .info {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        background: var(--input-bg);
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--border-color);
+        text-align: left;
+        padding-left: 20px;
+      }
+
+      th {
+        background: #f3f4f6;
+        font-weight: 600;
+      }
+
+      tbody tr:hover {
+        background: var(--hover-row);
+      }
+
+      #loader {
+        display: none;
+        padding: 12px 0;
+        color: var(--muted);
+      }
+
+      #error {
+        color: #b91c1c;
+        margin-top: 6px;
+        display: none;
+      }
+      
+
+      @media (max-width: 720px) {
+        .card {
+          padding: 16px;
+        }
+        th,
+        td {
+          padding: 8px;
+          font-size: 13px;
+        }
+        .controls {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+        }
+      }
+
+      /* Table buttons */
+      table button {
+        margin-top: 16px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 500;
+        cursor: pointer;
+        /*transition: background 0.2s ease;*/
+        transition: transform 0.3s ease; /* smooth scaling */
+      }
+
+      table button:hover {
+        transform: scale(1.05); /* slightly bigger on hover */
+      }
+
+      table thead th {
+        position: sticky;
+        top: 0;
+        background: #f3f4f6; /* same as your header background */
+        z-index: 2; /* ensures header stays on top of tbody rows */
+      }
+      .upload_container {
+        display: flex;
+        
+        flex-direction: column;
+      }
+
+      .upload_container_2 {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        width: max-content;
+      }
+
+      #upload_heading {
+        width: 225px;
+        margin-top: 0px;
+      }
+      #csvFile {
+            width: 55%;
+    margin-bottom: 45px;
+    margin-top: -5px;
+      }
+
+      #upload_btn {
+            margin-bottom: 45px;
+    margin-top: -5px;
+      }
+
+      #msg{
+        margin-left: 790px;
+        margin-top: -55px;
+      }
+
+      .bottom_table{
+        margin-top: -80px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Add Customer Form -->
+    <div class="card">
+      <h1>Add / Edit Customer</h1>
+      <form id="customerForm">
+        <div class="input_bar">
+          <div>
+            <label>Name:</label>
+            <input type="text" name="name" required />
+          </div>
+          <div>
+            <label>Mobile No:</label>
+            <input
+              type="text"
+              name="mob_no"
+              id="mob_no"
+              maxlength="10"
+              required
+            />
+          </div>
+          <div>
+            <label>Email ID:</label>
+            <input type="email" name="email_id" required />
+          </div>
+          <div>
+            <label for="state">State:</label>
+            <select name="state" id="state" required>
+              <option value="">-- Select State --</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+              <option value="Assam">Assam</option>
+              <option value="Bihar">Bihar</option>
+              <option value="Chhattisgarh">Chhattisgarh</option>
+              <option value="Goa">Goa</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Himachal Pradesh">Himachal Pradesh</option>
+              <option value="Jharkhand">Jharkhand</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Manipur">Manipur</option>
+              <option value="Meghalaya">Meghalaya</option>
+              <option value="Mizoram">Mizoram</option>
+              <option value="Nagaland">Nagaland</option>
+              <option value="Odisha">Odisha</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Sikkim">Sikkim</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Tripura">Tripura</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="Uttarakhand">Uttarakhand</option>
+              <option value="West Bengal">West Bengal</option>
+              <option value="Andaman and Nicobar Islands">
+                Andaman and Nicobar Islands
+              </option>
+              <option value="Chandigarh">Chandigarh</option>
+              <option value="Dadra and Nagar Haveli and Daman and Diu">
+                Dadra and Nagar Haveli and Daman and Diu
+              </option>
+              <option value="Delhi">Delhi</option>
+              <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+              <option value="Ladakh">Ladakh</option>
+              <option value="Lakshadweep">Lakshadweep</option>
+              <option value="Puducherry">Puducherry</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Address:</label>
+            <input type="text" name="address" required />
+          </div>
+
+          <div>
+            <label>Query Date:</label>
+            <input type="date" name="query_date" required />
+          </div>
+
+          <div class="input_bar_btn">
+            <button type="submit">Save Customer</button>
+          </div>
+
+          <div class="input_bar_btn">
+            <button type="reset" style="margin-left: -50px">Reset</button>
+          </div>
+
+          <div class="upload_container">
+            <h2 id="upload_heading">Upload CSV</h2>
+            <div class="upload_container_2">
+              <input type="file" id="csvFile" accept=".csv" />
+              <button onclick="uploadCSV()" id="upload_btn">Upload</button>
+            </div>
+          </div>
+
+          <div class="msg" id="msg"></div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Customer List -->
+    <div class="card bottom_table">
+      <h2>Customer List</h2>
+      <div class="controls">
+        <input
+          type="search"
+          id="search"
+          placeholder="Search by name, mobile, email or state..."
+        />
+        <button id="refreshBtn">Refresh</button>
+        <div class="info" id="countInfo"></div>
+      </div>
+
+      <div id="loader">Loading customers...</div>
+      <div id="error"></div>
+
+      <div style="overflow: auto; max-height: 400px">
+        <table id="customerTable" aria-live="polite">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Email</th>
+              <th>State</th>
+              <th>Address</th>
+              <th>Query Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:2000/api/admin/user";
+
+      const form = document.getElementById("customerForm");
+      const tbody = document.querySelector("#customerTable tbody");
+      const loader = document.getElementById("loader");
+      const errorDiv = document.getElementById("error");
+      const searchInput = document.getElementById("search");
+      const refreshBtn = document.getElementById("refreshBtn");
+      const countInfo = document.getElementById("countInfo");
+      const mobInput = document.getElementById("mob_no");
+
+      let customersData = [];
+      let editingId = null;
+
+      function showLoader() {
+        loader.style.display = "block";
+        errorDiv.style.display = "none";
+      }
+      function hideLoader() {
+        loader.style.display = "none";
+      }
+      function showError(msg) {
+        errorDiv.textContent = msg;
+        errorDiv.style.display = "block";
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(
+          /[&<>"']/g,
+          (s) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[s])
+        );
+      }
+
+      function renderTable(data) {
+        tbody.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" style="text-align:center; padding:18px; color:#6b7280">No records found</td></tr>';
+          countInfo.textContent = "0 records";
+          return;
+        }
+        countInfo.textContent = `${data.length} record(s)`;
+        data.forEach((c) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+        <td>${escapeHtml(c.name ?? "")}</td>
+        <td>${escapeHtml(c.mob_no ?? "")}</td>
+        <td>${escapeHtml(c.email_id ?? "")}</td>
+        <td>${escapeHtml(c.state ?? "")}</td>
+        <td>${escapeHtml(c.address ?? "")}</td>
+        <td>${escapeHtml(c.query_date ?? "")}</td>
+        <td>
+          <button onclick="editCustomer('${c._id}')">Edit</button>
+          <button onclick="deleteCustomer('${c._id}')">Delete</button>
+        </td>
+      `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function loadCustomers() {
+        showLoader();
+        try {
+          const res = await fetch(API_URL);
+          if (!res.ok) throw new Error(`Server responded ${res.status}`);
+          const data = await res.json();
+          customersData = Array.isArray(data) ? data : [];
+          renderTable(customersData);
+        } catch (err) {
+          console.error(err);
+          showError("Failed to load customers. Check console.");
+        } finally {
+          hideLoader();
+        }
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (mobInput.value.length !== 10) {
+          alert("Mobile number must be exactly 10 digits");
+          mobInput.focus();
+          return;
+        }
+
+        const formData = {
+          name: form.name.value,
+          mob_no: form.mob_no.value,
+          email_id: form.email_id.value,
+          state: form.state.value,
+          address: form.address.value,
+          query_date: form.query_date.value,
+        };
+
+        try {
+          let res;
+          if (editingId) {
+            res = await fetch(`${API_URL}/${editingId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            });
+            editingId = null;
+          } else {
+            res = await fetch(API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            });
+          }
+
+          const result = await res.json();
+          alert(
+            res.ok
+              ? result.message || "Customer saved ✅"
+              : result.message || "Something went wrong ❌"
+          );
+          form.reset();
+          loadCustomers();
+        } catch (err) {
+          console.error(err);
+          showError("Failed to save customer");
+        }
+      });
+
+      window.editCustomer = (id) => {
+        const c = customersData.find((x) => x._id === id);
+        if (!c) return;
+        form.name.value = c.name;
+        form.mob_no.value = c.mob_no;
+        form.email_id.value = c.email_id;
+        form.state.value = c.state;
+        form.address.value = c.address;
+        form.query_date.value = c.query_date?.substring(0, 10) || "";
+        editingId = id;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      window.deleteCustomer = async (id) => {
+        if (!confirm("Are you sure you want to delete this customer?")) return;
+        try {
+          const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+          if (!res.ok) throw new Error("Delete failed");
+          loadCustomers();
+        } catch (err) {
+          showError("Failed to delete customer");
+        }
+      };
+
+      searchInput.addEventListener("input", (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        if (!q) {
+          renderTable(customersData);
+          return;
+        }
+        const filtered = customersData.filter((c) => {
+          const hay = [c.name, c.mob_no, c.email_id, c.state, c.address]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          return hay.includes(q);
+        });
+        renderTable(filtered);
+      });
+
+      refreshBtn.addEventListener("click", loadCustomers);
+
+      mobInput.addEventListener("input", function () {
+        this.value = this.value.replace(/[^0-9]/g, "");
+      });
+
+      loadCustomers();
+
+      // Upload CSV file
+      // Upload CSV file
+      async function uploadCSV() {
+        const fileInput = document.getElementById("csvFile");
+        const msgDiv = document.getElementById("msg");
+
+        if (!fileInput.files.length) {
+          msgDiv.textContent = "❌ Please select a CSV file!";
+          msgDiv.style.color = "red";
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        msgDiv.textContent = "⏳ Processing CSV...";
+        msgDiv.style.color = "blue";
+
+        try {
+          const response = await fetch("http://localhost:2000/importUser", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            msgDiv.textContent = "✅ Successfully uploaded!";
+            msgDiv.style.color = "green";
+          } else {
+            msgDiv.textContent = "❌ Failed: " + data.msg;
+            msgDiv.style.color = "red";
+          }
+
+          loadCustomers(); // refresh after upload
+          fileInput.value = ""; // clear file input
+        } catch (err) {
+          msgDiv.textContent = `❌ Error: ${err.message}`;
+          msgDiv.style.color = "red";
+        }
+      }
+    </script>
+  </body>
+</html>
