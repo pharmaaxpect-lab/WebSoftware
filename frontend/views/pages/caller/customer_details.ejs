@@ -221,7 +221,7 @@
         };
 
         if (id) {
-          await fetch(`http://crm.axpectportal.in/customers/${id}`, {
+          await fetch(`https://crm.axpectportal.in/customers/${id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -247,7 +247,7 @@
         }
 
         const res = await fetch(
-          "http://crm.axpectportal.in/caller/my-customers",
+          "https://crm.axpectportal.in/caller/my-customers",
           {
             method: "GET",
             headers: { Authorization: "Bearer " + token },
@@ -319,7 +319,7 @@
 
         try {
           const res = await fetch(
-            `http://crm.axpectportal.in/caller/customers/${id}/hide`,
+            `https://crm.axpectportal.in/caller/customers/${id}/hide`,
             {
               method: "PUT",
               headers: { Authorization: "Bearer " + token },

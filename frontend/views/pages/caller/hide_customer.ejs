@@ -111,7 +111,7 @@
         }
 
         const res = await fetch(
-          "http://crm.axpectportal.in/caller/my-hidden-customers",
+          "https://crm.axpectportal.in/caller/my-hidden-customers",
           {
             method: "GET",
             headers: { Authorization: "Bearer " + token },
@@ -163,7 +163,7 @@
 
         try {
           const res = await fetch(
-            `http://crm.axpectportal.in/caller/customers/${id}/unhide`,
+            `https://crm.axpectportal.in/caller/customers/${id}/unhide`,
             {
               method: "PUT",
               headers: { Authorization: "Bearer " + token },
