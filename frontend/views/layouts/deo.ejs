@@ -172,8 +172,7 @@ body {
 </script>
 
   <script>
-       const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+      
 
   function logout() {
     localStorage.clear();
@@ -181,6 +180,10 @@ body {
   }
 
   async function verifyToken() {
+
+     const token = localStorage.getItem('token');
+     const role = localStorage.getItem('role');
+     
     if (!token && role != "DEO") return logout();
 
     try {
