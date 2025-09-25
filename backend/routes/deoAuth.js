@@ -91,8 +91,6 @@ router.get("/me", auth, async (req, res) => {
 // ===== VERIFY TOKEN + ROLE + DEO_ID =====
 router.post("/verify", (req, res) => {
   const authHeader = req.headers["authorization"];
-  const clientRole = req.headers["x-role"];  // frontend se bhejenge
-
   if (!authHeader) {
     return res.status(401).json({ success: false, message: "No token provided" });
   }
@@ -107,13 +105,20 @@ router.post("/verify", (req, res) => {
       return res.status(403).json({ success: false, message: "Invalid token" });
     }
 
-    // ✅ Role match check
-    if (decoded.role !== clientRole) {
-      return res.status(403).json({ success: false, message: "Role mismatch" });
+    // ✅ Only ADMIN allowed
+    if (decoded.role !== "DEO") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. DEO role required",
+      });
     }
 
-    // ✅ token + role dono sahi hain
-    res.json({ success: true, user: decoded });
+    // ✅ Agar sab sahi hai
+    res.json({
+      success: true,
+      message: "Token verified. Role = DEO",
+      user: decoded,
+    });
   });
 });
 
