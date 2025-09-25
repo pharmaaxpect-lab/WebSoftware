@@ -64,6 +64,29 @@ app.get("/caller/support", (req, res) => {
   res.render("pages/caller/support", { title: "DEO Settings", layout: "layouts/caller" });
 });
 
+// ----------- ADMIN ROUTES -----------
+const adminLayout = "layouts/admin";
+
+app.get("/admin/dashboard", (req, res) => {
+  res.render("pages/admin/dashboard", { title: "Admin Dashboard", layout: adminLayout });
+});
+
+app.get("/admin/assign_data", (req, res) => {
+  res.render("pages/admin/assign_data", { title: "Assign Data", layout: adminLayout });
+});
+
+app.get("/admin/employee_controller", (req, res) => {
+  res.render("pages/admin/employee_controller", { title: "Employee Controller", layout: adminLayout });
+});
+
+app.get("/admin/personal_details", (req, res) => {
+  res.render("pages/admin/personal_details", { title: "Profile", layout: adminLayout });
+});
+
+app.get("/admin/support", (req, res) => {
+  res.render("pages/admin/support", { title: "Support", layout: adminLayout });
+});
+
 // Login Page (Home)
 app.get("/", (req, res) => {
   res.render("login", { title: "Login", layout: false });
