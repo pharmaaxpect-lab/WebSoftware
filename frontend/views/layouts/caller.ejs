@@ -81,7 +81,7 @@
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
-    if (!token || role != "CALLER") return logout();
+    // if (!token && role != "CALLER") return logout();
 
     try {
       const res = await fetch("http://localhost:2000/api/caller/auth/verify", {
