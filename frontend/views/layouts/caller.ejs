@@ -81,7 +81,7 @@
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
-    if (!token || role !== "DEO") return logout();
+    if (!token || role !== "CALLER") return logout();
 
     // try {
     //   const res = await fetch("https://crm.axpectportal.in/caller/auth/verify", {
