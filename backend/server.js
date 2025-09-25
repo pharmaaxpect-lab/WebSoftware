@@ -27,6 +27,7 @@ app.use("/caller", require("./routes/callerRoutes"));
 
 app.use("/caller/auth", require("./routes/callerAuth"));
 app.use("/admin/auth", require("./routes/adminAuth"));
+app.use("/api/deo/auth", require("./routes/deoAuth"));
 
 // ✅ Import & use Admin routes
 
