@@ -69,9 +69,6 @@
 </script>
 
   <script>
-
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
   
 
   function logout() {
@@ -81,27 +78,28 @@
 
   async function verifyToken() {
 
-    
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
 
-     if (!token) return logout();
+     if (!token && role != "CALLER") return logout();
 
-    try {
-      const res = await fetch("https://crm.axpectportal.in/caller/auth/verify", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token
+    // try {
+    //   const res = await fetch("https://crm.axpectportal.in/caller/auth/verify", {
+    //     method: "POST",
+    //     headers: { 
+    //       "Content-Type": "application/json",
+    //       "Authorization": "Bearer " + token
           
-        }
-      });
+    //     }
+    //   });
 
       const data = await res.json();
       if (!res.ok || !data.success) {
         logout();
       }
-    } catch {
-      logout();
-    }
+    // } catch {
+    //   logout();
+    // }
   }
 
   // 🚀 Check once at page load
