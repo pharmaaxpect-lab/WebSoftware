@@ -114,7 +114,7 @@ router.get("/me", auth, async (req, res) => {
 // ===== VERIFY TOKEN + ROLE =====
 router.post("/verify", (req, res) => {
   const authHeader = req.headers["authorization"];
-  const clientRole = req.headers["x-role"];  // frontend se bhejenge
+  // const clientRole = req.headers["x-role"];  // frontend se bhejenge
 
   if (!authHeader) {
     return res.status(401).json({ success: false, message: "No token provided" });
@@ -131,7 +131,7 @@ router.post("/verify", (req, res) => {
     }
 
     // ✅ Role match check
-    if (decoded.role !== clientRole) {
+    if (decoded.role !== "CALLER") {
       return res.status(403).json({ success: false, message: "Role mismatch" });
     }
 
