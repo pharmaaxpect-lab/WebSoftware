@@ -77,32 +77,32 @@
     window.location.href = "/";
   }
 
-  async function verifyToken() {
-    if (!token && role != "CALLER") return logout();
+  // async function verifyToken() {
+  //   if (!token && role != "CALLER") return logout();
 
-    try {
-      const res = await fetch("http://localhost:2000/api/caller/auth/verify", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token
-        }
-      });
+  //   try {
+  //     const res = await fetch("http://localhost:2000/api/caller/auth/verify", {
+  //       method: "POST",
+  //       headers: { 
+  //         "Content-Type": "application/json",
+  //         "Authorization": "Bearer " + token
+  //       }
+  //     });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        logout();
-      }
-    } catch {
-      logout();
-    }
-  }
+  //     const data = await res.json();
+  //     if (!res.ok || !data.success) {
+  //       logout();
+  //     }
+  //   } catch {
+  //     logout();
+  //   }
+  // }
 
-  // 🚀 Check once at page load
-  verifyToken();
+  // // 🚀 Check once at page load
+  // verifyToken();
 
-  // 🚀 Keep checking every 1 minute (60000 ms)
-  setInterval(verifyToken, 60000);
+  // // 🚀 Keep checking every 1 minute (60000 ms)
+  // setInterval(verifyToken, 60000);
 </script>
 </body>
 </html>
