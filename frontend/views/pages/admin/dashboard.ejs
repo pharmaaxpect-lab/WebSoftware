@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin CRM Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        margin: 0;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .filters {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .stats div {
+      background: #f8f9fa;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      flex: 1 1 120px;
+      text-align: center;
+    }
+    .stats span {
+      display: block;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>📊 Admin CRM Dashboard</h2>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div>
+      <label><b>Select Caller:</b></label>
+      <select id="callerSelect"></select>
+    </div>
+    <div>
+      <label><b>Select Time:</b></label>
+      <select id="timeSelect">
+        <option value="all">All</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="annually">Annually</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Dynamic Dashboard Section -->
+  <div id="dashboardContainer"></div>
+
+  <script>
+    let allData = {};
+    let pieChart, barChart;
+
+    async function loadAdminDashboard() {
+      try {
+        const res = await fetch("https://axpectportal.in/admin/dashboard");
+        allData = await res.json();
+
+        if (!allData.callers) {
+          alert("API response format is incorrect!");
+          return;
+        }
+
+        // Populate caller dropdown
+        const select = document.getElementById("callerSelect");
+        select.innerHTML = `<option value="all">All Callers</option>`;
+        allData.callers.forEach((c, i) => {
+          select.innerHTML += `<option value="${i}">${c.name} (${c.caller_id})</option>`;
+        });
+
+        // Default load
+        renderDashboard();
+
+        // On change events
+        select.addEventListener("change", renderDashboard);
+        document.getElementById("timeSelect").addEventListener("change", renderDashboard);
+
+      } catch (err) {
+        console.error(err);
+        alert("Error loading dashboard data");
+      }
+    }
+
+    function filterByTime(leads, timeFilter) {
+      if (timeFilter === "all") return leads;
+
+      const now = new Date();
+      return leads.filter(lead => {
+        const createdAt = new Date(lead.createdAt);
+        if (timeFilter === "daily") {
+          return createdAt.toDateString() === now.toDateString();
+        }
+        if (timeFilter === "weekly") {
+          const weekAgo = new Date();
+          weekAgo.setDate(now.getDate() - 7);
+          return createdAt >= weekAgo && createdAt <= now;
+        }
+        if (timeFilter === "monthly") {
+          return (
+            createdAt.getMonth() === now.getMonth() &&
+            createdAt.getFullYear() === now.getFullYear()
+          );
+        }
+        if (timeFilter === "annually") {
+          return createdAt.getFullYear() === now.getFullYear();
+        }
+      });
+    }
+
+    function renderDashboard() {
+      const callerSelect = document.getElementById("callerSelect").value;
+      const timeSelect = document.getElementById("timeSelect").value;
+
+      let leads = [];
+      let title = "";
+
+      if (callerSelect === "all") {
+        leads = allData.callers.flatMap(c => c.leads);
+        title = "Overall Lead Report";
+      } else {
+        const caller = allData.callers[callerSelect];
+        leads = caller.leads;
+        title = `Lead Report - ${caller.name} (${caller.caller_id})`;
+      }
+
+      // Time filter apply
+      leads = filterByTime(leads, timeSelect);
+
+      // Prepare data
+      const statusCounts = {};
+      leads.forEach(lead => {
+        let status = lead.lead_status || "Pending Calls";
+        if (status === "Unknown") status = "Pending Calls";
+        statusCounts[status] = (statusCounts[status] || 0) + 1;
+      });
+
+      const totalLeads = leads.length;
+      const labels = Object.keys(statusCounts);
+      const values = Object.values(statusCounts);
+      const percentages = values.map(v => ((v / totalLeads) * 100).toFixed(2));
+
+      // Update dashboard container
+      const container = document.getElementById("dashboardContainer");
+      container.innerHTML = `
+        <div class="dashboard">
+          <div class="card">
+            <h3>${title}</h3>
+            <div class="stats" id="statsContainer"></div>
+          </div>
+          <div class="card">
+            <h3>Lead Status %</h3>
+            <canvas id="pieChart"></canvas>
+          </div>
+          <div class="card" style="grid-column: span 2">
+            <h3>Lead Distribution</h3>
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+      `;
+
+      // Update stats
+      const statsContainer = document.getElementById("statsContainer");
+      statsContainer.innerHTML = `
+        <div>
+          Total Leads
+          <span>${totalLeads}</span>
+        </div>
+      `;
+      labels.forEach((status, i) => {
+        statsContainer.innerHTML += `
+          <div>
+            ${status}
+            <span>${values[i]} (${percentages[i]}%)</span>
+          </div>
+        `;
+      });
+
+      // Pie Chart
+      if (pieChart) pieChart.destroy();
+      pieChart = new Chart(document.getElementById("pieChart"), {
+        type: "pie",
+        data: {
+          labels: labels.map((status, i) => `${status} (${percentages[i]}%)`),
+          datasets: [
+            {
+              data: values,
+              backgroundColor: [
+                "#4CAF50", "#3498db", "#e67e22",
+                "#E74C3C", "#9b59b6", "#16a085", "#f1c40f"
+              ],
+            },
+          ],
+        },
+      });
+
+      // Bar Chart
+      if (barChart) barChart.destroy();
+      barChart = new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Number of Leads",
+              data: values,
+              backgroundColor: "#3498db",
+            },
+            {
+              label: "Percentage (%)",
+              data: percentages,
+              backgroundColor: "#2ecc71",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    loadAdminDashboard();
+  </script>
+
+  
+</body>
+</html>

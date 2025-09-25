@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assign Customers</title>
+
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+
+    select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      min-width: 120px;
+      font-size: 14px;
+    }
+
+    /* ✅ Table Container with Scroll */
+    .table-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      margin: 20px;
+      border-radius: 6px;
+    }
+
+    #customerTableWrapper {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #customerTableWrapper th,
+    #customerTableWrapper td {
+      border: 1px solid #ddd;
+      padding: 12px 15px;
+      text-align: center;
+    }
+
+    #customerTableWrapper th {
+      position: sticky;   /* ✅ Sticky header */
+      top: 0;
+      background: #007bff;
+      color: white;
+      text-transform: uppercase;
+      font-size: 14px;
+      z-index: 2;
+    }
+
+    #customerTableWrapper tr:nth-child(even) {
+      background: #f2f2f2;
+    }
+
+    #customerTableWrapper tr:hover {
+      background: #e9f5ff;
+    }
+
+    .assign-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 25px;
+      background: #28a745;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .assign-btn:hover {
+      background: #218838;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    .heading_assign {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Assign Customers to Caller</h2>
+
+  <!-- Caller Select + Rows Selector -->
+  <div class="heading_assign">
+    <div class="form-group">
+      <label for="callerSelect">Select Caller:</label>
+      <select id="callerSelect"></select>
+    </div>
+
+    <div class="form-group">
+      <label for="rowsPerPage">Rows:</label>
+      <select id="rowsPerPage" onchange="loadCustomers()">
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+      </select>
+    </div>
+
+    <div>
+      <button class="assign-btn" onclick="assignCustomers()">Assign</button>
+    </div>
+  </div>
+
+  <!-- Customer Table Wrapper -->
+  <div class="table-container">
+    <table id="customerTableWrapper">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAll"></th>
+          <th>Name</th>
+          <th>Mobile</th>
+          <th>Email</th>
+          <th>Address</th>
+        </tr>
+      </thead>
+      <tbody id="customerTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Fetch Callers for Dropdown
+    fetch("https://crm.axpectportal.in/admin")
+      .then((res) => res.json())
+      .then((callers) => {
+        let select = document.getElementById("callerSelect");
+        callers.forEach((c) => {
+          let opt = document.createElement("option");
+          opt.value = c.caller_id;
+          opt.innerText = `${c.name} (${c.caller_id})`;
+          select.appendChild(opt);
+        });
+      })
+      .catch(console.error);
+
+    // Load Customers (with row limit)
+    function loadCustomers() {
+      let rowsLimit = parseInt(document.getElementById("rowsPerPage").value || 50);
+
+      fetch("https://axpectportal.in/admin/user")
+        .then((res) => res.json())
+        .then((customers) => {
+          let tbody = document.getElementById("customerTable");
+          tbody.innerHTML = "";
+
+          customers
+            .filter((c) => !c.caller_id || c.caller_id === "")
+            .slice(0, rowsLimit)
+            .forEach((c, idx) => {
+              let row = document.createElement("tr");
+              row.innerHTML = `
+                <td><input type="checkbox" class="customer-checkbox" data-id="${c._id}" id="chk_${idx}"></td>
+                <td>${c.name}</td>
+                <td>${c.mob_no}</td>
+                <td>${c.email_id}</td>
+                <td>${c.address}</td>
+              `;
+              tbody.appendChild(row);
+            });
+
+          // Reset selectAll checkbox when reloading
+          document.getElementById("selectAll").checked = false;
+        })
+        .catch(console.error);
+    }
+
+    // Select/Deselect all checkboxes
+    document.getElementById("selectAll").addEventListener("change", function () {
+      let checked = this.checked;
+      document
+        .querySelectorAll(".customer-checkbox")
+        .forEach((cb) => (cb.checked = checked));
+    });
+
+    function assignCustomers() {
+      let callerId = document.getElementById("callerSelect").value;
+
+      let checked = [...document.querySelectorAll(".customer-checkbox:checked")]
+        .map((cb) => cb.dataset.id);
+
+      checked = [...new Set(checked)];
+
+      if (!callerId || checked.length === 0) {
+        alert("Please select a caller and at least one customer!");
+        return;
+      }
+
+      fetch("https://crm.axpectportal.in/admin/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caller_id: callerId, customerIds: checked }),
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            let err = await res.json().catch(() => ({}));
+            throw new Error(err.message || "Failed to assign customers");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          alert(data.message || "Customers assigned successfully!");
+          loadCustomers(); // reload after assign
+        })
+        .catch((err) => {
+          console.error("❌ Error in assignCustomers:", err);
+          alert("Error: " + err.message);
+        });
+    }
+
+    // Initial Load
+    loadCustomers();
+  </script>
+</body>
+</html>

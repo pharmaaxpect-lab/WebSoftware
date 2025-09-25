@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Profile</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 0 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #1e3a8a;
+      margin-bottom: 20px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .field {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .field:last-child {
+      border-bottom: none;
+    }
+    .label {
+      font-weight: bold;
+      color: #374151;
+    }
+    .value {
+      color: #1f2937;
+    }
+    .no-data {
+      text-align: center;
+      color: #6b7280;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="welcome">Welcome</h1>
+
+  <div class="container" id="adminContainer">
+    <div class="no-data">Loading...</div>
+  </div>
+
+  <script>
+    async function fetchData() {
+      const adminContainer = document.getElementById("adminContainer");
+      const welcome = document.getElementById("welcome");
+
+      try {
+        // 👇 Public API call (without token)
+        const res = await fetch("https://crm.axpectportal.in/personal/admin/public/ADM001");
+        const data = await res.json();
+
+        if (!data.success || !data.admin) {
+          adminContainer.innerHTML = `<div class="no-data">No records found</div>`;
+          return;
+        }
+
+        const admin = data.admin;
+
+        // Update welcome message
+        welcome.textContent = `Welcome ${admin.name}`;
+
+        // Fill container with details
+        adminContainer.innerHTML = `
+          <div class="field">
+            <div class="label">Admin ID:</div>
+            <div class="value">${admin.admin_id}</div>
+          </div>
+          <div class="field">
+            <div class="label">Name:</div>
+            <div class="value">${admin.name}</div>
+          </div>
+          <div class="field">
+            <div class="label">Mobile No:</div>
+            <div class="value">${admin.mob_no || "-"}</div>
+          </div>
+          <div class="field">
+            <div class="label">Email ID:</div>
+            <div class="value">${admin.email_id || "-"}</div>
+          </div>
+        `;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        adminContainer.innerHTML =
+          `<div class="no-data">Failed to load data</div>`;
+      }
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>

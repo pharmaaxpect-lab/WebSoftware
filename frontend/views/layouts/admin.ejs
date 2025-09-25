@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+
+    <!-- Font Awesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">Welcome to Axpect Pharma</div>
+      <div class="nav-right">
+        <div>username</div>
+        <a href="/notifications" class="icon-btn"
+          ><i class="fa-solid fa-bell"></i
+        ></a>
+        <a href="#" id="logoutBtn" class="icon-btn">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
+      </div>
+    </nav>
+
+    <div class="main-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <ul>
+          <li>
+            <a href="/admin/dashboard"
+              ><i class="fa-solid fa-gauge"></i> Dashboard</a
+            >
+          </li>
+          <li>
+            <a href="/admin/assign_data"
+              ><i class="fa-solid fa-users"></i> Assign Data</a
+            >
+          </li>
+          <li>
+            <a href="/admin/employee_controller"
+              ><i class="fa-solid fa-gear"></i> Employee Controller</a
+            >
+          </li>
+          <li>
+            <a href="/admin/personal_details"
+              ><i class="fa-solid fa-gear"></i> Personal Details</a
+            >
+          </li>
+          <li>
+            <a href="/admin/support"
+              ><i class="fa-solid fa-gear"></i> Support</a
+            >
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Page Content -->
+      <main class="content"><%- body %></main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>© 2025 MyApp. All rights reserved.</p>
+    </footer>
+
+    <script>
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+
+          // ✅ Clear localStorage
+          localStorage.clear();
+
+          // ✅ Show alert
+          alert("You have been logged out successfully!");
+
+          // ✅ Redirect to homepage/login
+          window.location.href = "/";
+        });
+    </script>
+
+    <script>
+      // localStorage.setItem("admin_id", data.user.admin_id);
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+
+      function logout() {
+        // ✅ Clear localStorage
+        localStorage.clear();
+        window.location.href = "/";
+      }
+
+      async function verifyToken() {
+        if (!token) return logout();
+
+        try {
+          const res = await fetch(
+            "https://crm.axpectportal.in/admin/auth/verify",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+              },
+            }
+          );
+
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            logout();
+          }
+        } catch {
+          logout();
+        }
+      }
+
+      // 🚀 Check once at page load
+      verifyToken();
+
+      // 🚀 Keep checking every 1 minute (60000 ms)
+      setInterval(verifyToken, 60000);
+    </script>
+  </body>
+</html>

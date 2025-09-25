@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Employee Management</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        margin: 0px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f4f4f4;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+      button {
+        margin: 2px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      .table-container {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+      }
+      #searchInput {
+        padding: 8px;
+        width: 80%;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .hidden {
+        display: none;
+      }
+
+      /* 🔹 Notification CSS */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        z-index: 1000;
+        display: none;
+      }
+      .notification.success {
+        background-color: #4caf50;
+      }
+      .notification.error {
+        background-color: #f44336;
+      }
+
+      .select_search_field {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        text-align: center;
+        align-items: center;
+        justify-content: space-around;
+        background-color: #d2d6daa3;
+        padding: 5px 9px;
+        border-radius: 5px;
+      }
+      .search_bar {
+        width: 70%;
+      }
+      .select_emp {
+        padding: 6px;
+        font-size: 15px;
+        width: 100px;
+        border-radius: 5px;
+      }
+      .input_bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 75px;
+        padding-bottom: 40px;
+        row-gap: 0px;
+      }
+      .input_bar_btn {
+        margin-top: 25px;
+      }
+      form label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 500;
+      }
+      form input {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 6px;
+        border-radius: 6px;
+        border-color: #a5a7aa;
+        background: #ffffff;
+        font-size: 14px;
+        outline: none;
+      }
+      form button {
+        margin-top: 16px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #2b8cff;
+        color: #fff;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .table_heading {
+        position: absolute;
+        margin-top: -50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="margin-top: 0px;">Employee Management</h1>
+
+    <!-- 🔹 Notification Div -->
+    <div id="notification" class="notification"></div>
+
+    <div class="select_search_field">
+      <div>
+        <label for="employeeType">Select Employee Type: </label>
+        <select id="employeeType" class="select_emp">
+          <option value="caller">Caller</option>
+          <option value="deo">DEO</option>
+        </select>
+      </div>
+
+      <div class="search_bar">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by ID, Name, Mobile, or Email..."
+        />
+      </div>
+    </div>
+
+    <!-- Caller Form -->
+    <div id="callerFormContainer">
+      <h2 id="callerFormTitle">Add Caller Employee</h2>
+      <form id="callerForm">
+        <div class="input_bar">
+          <!-- 🔹 Caller ID field (hidden in add, readonly in edit) -->
+          <div id="callerIdField" class="hidden">
+            <label>Caller ID (Read Only):</label>
+            <input type="text" name="caller_id" readonly />
+          </div>
+
+          <div>
+            <label>Name:</label>
+            <input type="text" name="name" required />
+          </div>
+          <div>
+            <label>Mobile:</label>
+            <input type="text" name="mob_no" required />
+          </div>
+          <div>
+            <label>Email:</label>
+            <input type="email" name="email_id" required />
+          </div>
+          <div>
+            <label>Password:</label>
+            <input type="password" name="password" required />
+          </div>
+          <div class="input_bar_btn">
+            <button type="submit">Submit</button>
+          </div>
+          <div class="input_bar_btn">
+            <button type="reset" ;>Reset</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- DEO Form (Edit Only, no Add) -->
+    <div id="deoFormContainer" class="hidden">
+      <h2>Edit DEO Employee</h2>
+      <form id="deoForm">
+        <div class="input_bar">
+          <div>
+            <label>DEO ID (Read Only):</label>
+            <input type="text" name="deo_id" readonly />
+          </div>
+          <div>
+            <label>Name:</label>
+            <input type="text" name="name" required />
+          </div>
+          <div>
+            <label>Mobile:</label>
+            <input type="text" name="mob_no" required />
+          </div>
+          <div>
+            <label>Email:</label>
+            <input type="email" name="email_id" required />
+          </div>
+          <div class="input_bar_btn">
+            <button type="submit">Update</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Caller Table -->
+    <div id="callerTableContainer" class="table-container">
+      <h2 class="table_heading">Caller Employees</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Caller ID</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="callerTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- DEO Table -->
+    <div id="deoTableContainer" class="table-container hidden">
+      <h2 class="table_heading">DEO Employees</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>DEO ID</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="deoTableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      const employeeTypeSelect = document.getElementById("employeeType");
+      const callerFormContainer = document.getElementById("callerFormContainer");
+      const deoFormContainer = document.getElementById("deoFormContainer");
+      const callerTableContainer = document.getElementById("callerTableContainer");
+      const deoTableContainer = document.getElementById("deoTableContainer");
+
+      const callerForm = document.getElementById("callerForm");
+      const callerIdField = document.getElementById("callerIdField");
+      const callerFormTitle = document.getElementById("callerFormTitle");
+      const deoForm = document.getElementById("deoForm");
+      const callerTableBody = document.getElementById("callerTableBody");
+      const deoTableBody = document.getElementById("deoTableBody");
+      const searchInput = document.getElementById("searchInput");
+
+      let allCallers = [];
+      let allDeos = [];
+      let currentType = "caller";
+      let editingId = null;
+
+      function showNotification(message, type = "success") {
+        const notification = document.getElementById("notification");
+        notification.innerText = message;
+        notification.className = "notification " + type;
+        notification.style.display = "block";
+        setTimeout(() => {
+          notification.style.display = "none";
+        }, 3000);
+      }
+
+      // Switch Employee Type
+      employeeTypeSelect.addEventListener("change", () => {
+        currentType = employeeTypeSelect.value;
+        if (currentType === "caller") {
+          callerFormContainer.classList.remove("hidden");
+          callerTableContainer.classList.remove("hidden");
+          deoFormContainer.classList.add("hidden");
+          deoTableContainer.classList.add("hidden");
+        } else {
+          deoFormContainer.classList.remove("hidden");
+          deoTableContainer.classList.remove("hidden");
+          callerFormContainer.classList.add("hidden");
+          callerTableContainer.classList.add("hidden");
+        }
+      });
+
+      // Caller Add/Edit
+      callerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = {
+          name: callerForm.name.value,
+          mob_no: callerForm.mob_no.value,
+          email_id: callerForm.email_id.value,
+          password: callerForm.password.value,
+        };
+        let res;
+        if (editingId) {
+          res = await fetch(`https://crm.axpectportal.in/admin/${editingId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+        } else {
+          res = await fetch("https://crm.axpectportal.in/caller/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+        }
+        if (res.ok) {
+          loadCallers();
+          callerForm.reset();
+          callerIdField.classList.add("hidden"); // hide after submit
+          callerFormTitle.textContent = "Add Caller Employee";
+          showNotification(
+            editingId ? "Caller updated successfully!" : "Caller added successfully!",
+            "success"
+          );
+          editingId = null;
+        } else {
+          showNotification("Error saving caller!", "error");
+        }
+      });
+
+      async function loadCallers() {
+        const res = await fetch("https://crm.axpectportal.in/admin");
+        allCallers = await res.json();
+        renderCallerTable(allCallers);
+      }
+
+      function renderCallerTable(customers) {
+        callerTableBody.innerHTML = "";
+        customers.forEach((c) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${c.caller_id}</td>
+            <td>${c.name}</td>
+            <td>${c.mob_no}</td>
+            <td>${c.email_id}</td>
+            <td>
+              <button onclick="editCaller('${c._id}', '${c.caller_id}', '${c.name}', '${c.mob_no}', '${c.email_id}')">Edit</button>
+            </td>
+          `;
+          callerTableBody.appendChild(row);
+        });
+      }
+
+      window.editCaller = function (id, caller_id, name, mob_no, email_id) {
+        callerIdField.classList.remove("hidden");
+        callerFormTitle.textContent = "Edit Caller Employee";
+
+        callerForm.caller_id.value = caller_id;
+        callerForm.name.value = name;
+        callerForm.mob_no.value = mob_no;
+        callerForm.email_id.value = email_id;
+
+        editingId = id;
+      };
+
+      // DEO Edit Only
+      deoForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = {
+          name: deoForm.name.value,
+          mob_no: deoForm.mob_no.value,
+          email_id: deoForm.email_id.value,
+        };
+        let res = await fetch(`https://crm.axpectportal.in/admin/deo/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        if (res.ok) {
+          loadDeos();
+          showNotification("DEO updated successfully!", "success");
+          editingId = null;
+        } else {
+          showNotification("Error updating DEO!", "error");
+        }
+      });
+
+      async function loadDeos() {
+        const res = await fetch("https://crm.axpectportal.in/admin/deo");
+        allDeos = await res.json();
+        renderDeoTable(allDeos);
+      }
+
+      function renderDeoTable(customers) {
+        deoTableBody.innerHTML = "";
+        customers.forEach((c) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${c.deo_id}</td>
+            <td>${c.name}</td>
+            <td>${c.mob_no}</td>
+            <td>${c.email_id}</td>
+            <td>
+              <button onclick="editDeo('${c._id}', '${c.deo_id}', '${c.name}', '${c.mob_no}', '${c.email_id}')">Edit</button>
+            </td>
+          `;
+          deoTableBody.appendChild(row);
+        });
+      }
+
+      window.editDeo = function (id, deo_id, name, mob_no, email_id) {
+        deoForm.deo_id.value = deo_id;
+        deoForm.name.value = name;
+        deoForm.mob_no.value = mob_no;
+        deoForm.email_id.value = email_id;
+        editingId = id;
+      };
+
+      // Search
+      searchInput.addEventListener("input", () => {
+        const searchText = searchInput.value.toLowerCase();
+        if (currentType === "caller") {
+          const filtered = allCallers.filter(
+            (c) =>
+              c.caller_id.toLowerCase().includes(searchText) ||
+              c.name.toLowerCase().includes(searchText) ||
+              c.mob_no.toLowerCase().includes(searchText) ||
+              c.email_id.toLowerCase().includes(searchText)
+          );
+          renderCallerTable(filtered);
+        } else {
+          const filtered = allDeos.filter(
+            (c) =>
+              c.deo_id.toLowerCase().includes(searchText) ||
+              c.name.toLowerCase().includes(searchText) ||
+              c.mob_no.toLowerCase().includes(searchText) ||
+              c.email_id.toLowerCase().includes(searchText)
+          );
+          renderDeoTable(filtered);
+        }
+      });
+
+      // Initial load
+      loadCallers();
+      loadDeos();
+    </script>
+  </body>
+</html>
