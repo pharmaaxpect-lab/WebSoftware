@@ -184,7 +184,7 @@ body {
      const token = localStorage.getItem('token');
      const role = localStorage.getItem('role');
 
-    if (!token && role != "DEO") return logout();
+    if (!token || role !== "DEO") return logout();
 
     try {
       const res = await fetch("https://crm.axpectportal.in/deo/auth/verify", {
