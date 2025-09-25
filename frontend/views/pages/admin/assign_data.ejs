@@ -167,7 +167,7 @@
     function loadCustomers() {
       let rowsLimit = parseInt(document.getElementById("rowsPerPage").value || 50);
 
-      fetch("https://axpectportal.in/admin/user")
+      fetch("https://crm.axpectportal.in/admin/user")
         .then((res) => res.json())
         .then((customers) => {
           let tbody = document.getElementById("customerTable");

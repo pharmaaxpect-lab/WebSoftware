@@ -85,7 +85,7 @@
 
     async function loadAdminDashboard() {
       try {
-        const res = await fetch("https://axpectportal.in/admin/dashboard");
+        const res = await fetch("https://crm.axpectportal.in/admin/dashboard");
         allData = await res.json();
 
         if (!allData.callers) {
